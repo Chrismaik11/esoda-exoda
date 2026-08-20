@@ -1,0 +1,119 @@
+:root{
+  --bg:#f6f7f8; --card:#ffffff; --line:#e5e7eb;
+  --ink:#111827; --ink-2:#6b7280; --ink-3:#9ca3af;
+  --brand:#0f766e; --brand-bg:#0f766e14;
+  --green:#15803d; --green-bg:#15803d14;
+  --red:#dc2626; --red-bg:#dc262614;
+  --amber:#d97706; --amber-bg:#d9770614;
+  --radius:14px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;font-size:15px}
+button{font-family:inherit;cursor:pointer}
+input,select{font-family:inherit}
+
+.screen{display:none;max-width:560px;margin:0 auto;padding:16px}
+.screen.active{display:block}
+
+/* ---- auth ---- */
+.auth-wrap{max-width:400px;margin:8vh auto 0;padding:0 16px}
+.auth-logo{text-align:center;margin-bottom:24px}
+.auth-logo .dot{display:inline-block;width:14px;height:14px;border-radius:50%;background:var(--brand);margin-right:8px}
+.auth-logo h1{display:inline;font-size:24px;font-weight:700}
+.auth-logo p{color:var(--ink-2);font-size:13px;margin-top:8px}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:14px}
+.form-label{display:block;font-size:13px;font-weight:600;color:var(--ink-2);margin:12px 0 6px}
+.form-label:first-child{margin-top:0}
+.form-input,.form-select{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;font-size:15px;background:#fff;color:var(--ink)}
+.form-input:focus,.form-select:focus{outline:none;border-color:var(--brand)}
+.btn-primary{width:100%;padding:12px;background:var(--brand);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:600;margin-top:16px}
+.btn-primary:disabled{opacity:.6}
+.btn-secondary{width:100%;padding:11px;background:#fff;color:var(--ink);border:1px solid var(--line);border-radius:10px;font-size:14px;font-weight:500}
+.btn-link{background:none;border:none;color:var(--brand);font-size:13px;font-weight:600;padding:6px}
+.auth-switch{text-align:center;margin-top:10px;font-size:13px;color:var(--ink-2)}
+.auth-error{background:var(--red-bg);color:var(--red);padding:10px 12px;border-radius:10px;font-size:13px;margin-top:12px;display:none}
+
+/* ---- header ---- */
+.app-header{position:sticky;top:0;z-index:20;background:var(--card);border-bottom:1px solid var(--line);padding:10px 16px;display:flex;align-items:center;gap:10px}
+.app-header .dot{width:11px;height:11px;border-radius:50%;background:var(--brand);flex:none}
+.app-header .biz{font-weight:700;font-size:16px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.role-chip{font-size:11px;font-weight:600;background:var(--brand-bg);color:var(--brand);border-radius:99px;padding:3px 9px;flex:none}
+.icon-btn{background:none;border:none;font-size:18px;padding:6px;color:var(--ink-2);flex:none}
+
+/* ---- tabs ---- */
+.tabs{display:flex;gap:6px;margin:14px 0;overflow-x:auto}
+.tab-btn{flex:1;padding:9px 4px;border:1px solid var(--line);background:var(--card);border-radius:10px;font-size:13px;font-weight:600;color:var(--ink-2);white-space:nowrap}
+.tab-btn.active{background:var(--brand);border-color:var(--brand);color:#fff}
+
+.section-title{font-size:13px;font-weight:700;color:var(--ink-2);text-transform:uppercase;letter-spacing:.4px;margin:18px 0 8px}
+.row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:none}
+.row-main{flex:1;min-width:0}
+.row-title{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row-sub{font-size:12px;color:var(--ink-2)}
+.row-amount{font-weight:700;font-size:14px;white-space:nowrap}
+.row-amount.pos{color:var(--green)}
+.row-amount.neg{color:var(--red)}
+.btn-del{background:none;border:none;color:var(--ink-3);font-size:16px;padding:4px 6px}
+.empty{text-align:center;color:var(--ink-3);font-size:13px;padding:22px 0}
+
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* ---- period nav ---- */
+.period-nav{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.period-nav .label{flex:1;text-align:center;font-weight:700;font-size:14px}
+.pn-btn{width:38px;height:38px;border:1px solid var(--line);background:var(--card);border-radius:10px;font-size:16px}
+.gran-row{display:flex;gap:6px;margin-bottom:12px}
+.gran-btn{flex:1;padding:7px;border:1px solid var(--line);background:var(--card);border-radius:9px;font-size:12.5px;font-weight:600;color:var(--ink-2)}
+.gran-btn.active{background:var(--brand-bg);border-color:var(--brand);color:var(--brand)}
+
+/* ---- pnl ---- */
+.pnl-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+.pnl-row:last-child{border-bottom:none}
+.pnl-row .v{font-weight:700}
+.pnl-profit{font-size:17px}
+.bar{height:8px;border-radius:6px;background:var(--line);overflow:hidden;margin-top:4px}
+.bar > div{height:100%;background:var(--brand)}
+
+/* ---- φωνητική & σάρωση ---- */
+.voice-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;margin-bottom:12px;border:1.5px dashed var(--amber);background:transparent;color:var(--amber);border-radius:var(--radius);font-size:14px;font-weight:600}
+.voice-btn:active{opacity:.7}
+.tool-row{display:flex;gap:8px;margin-bottom:12px}
+.tool-row .voice-btn{margin-bottom:0;flex:1}
+.scan-btn{border-color:var(--brand);color:var(--brand)}
+.voice-overlay{position:fixed;inset:0;z-index:1000;background:rgba(15,15,15,.72);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center}
+.voice-panel{background:var(--card);color:var(--ink);border-radius:18px;padding:28px 22px 22px;width:min(92vw,360px);text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.35)}
+.voice-mic-circle{width:76px;height:76px;margin:0 auto 14px;border-radius:50%;background:#dc2626;color:#fff;display:flex;align-items:center;justify-content:center;position:relative;font-size:32px}
+.voice-mic-circle.listening::before{content:'';position:absolute;inset:-8px;border-radius:50%;border:3px solid #dc2626;animation:voice-ring 1.4s ease-out infinite}
+@keyframes voice-ring{0%{transform:scale(.85);opacity:.9}100%{transform:scale(1.35);opacity:0}}
+.voice-mic-circle.working{background:var(--brand);animation:voice-spin 1.2s linear infinite}
+@keyframes voice-spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+.voice-status{font-size:14px;font-weight:700;margin-bottom:6px}
+.voice-transcript{min-height:40px;font-size:15px;color:var(--ink-2);margin-bottom:14px;line-height:1.45}
+.voice-hint{font-size:11.5px;color:var(--ink-3);margin-bottom:16px;line-height:1.5}
+.voice-cancel{width:100%;padding:12px;border:none;border-radius:12px;background:var(--bg);color:var(--ink);font-size:14px;font-weight:600}
+.voice-summary{background:var(--green-bg);border:1px solid #6ee7b7;color:#065f46;border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.55;margin-bottom:12px}
+.voice-summary b{display:block;margin-bottom:2px}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#111827;color:#fff;padding:10px 18px;border-radius:99px;font-size:14px;z-index:100;opacity:0;transition:opacity .25s;pointer-events:none;max-width:90vw;text-align:center}
+.toast.show{opacity:1}
+.muted{color:var(--ink-2);font-size:13px;line-height:1.5}
+.spinner{text-align:center;color:var(--ink-3);padding:30px 0;font-size:13px}
+
+/* ---- κινήσεις: εναλλαγή τύπου ---- */
+.type-toggle{display:flex;gap:8px;margin-bottom:12px}
+.type-btn{flex:1;padding:10px;border:1.5px solid var(--line);background:var(--card);border-radius:10px;font-size:14px;font-weight:600;color:var(--ink-2)}
+.type-btn.active-in{background:var(--green-bg);border-color:var(--green);color:var(--green)}
+.type-btn.active-out{background:var(--red-bg);border-color:var(--red);color:var(--red)}
+
+/* ---- σύνοψη (hero) ---- */
+.hero-amount{text-align:center;font-size:32px;font-weight:800;margin:6px 0}
+.hero-split{display:flex;justify-content:space-around;text-align:center;margin-top:8px}
+.hero-mini{font-size:17px;font-weight:700}
+.hero-mini.pos{color:var(--green)}
+.hero-mini.neg{color:var(--red)}
+
+/* ---- σήμα εκκρεμοτήτων στο tab ---- */
+.tab-btn{position:relative}
+.tab-badge{position:absolute;top:-5px;right:-4px;min-width:17px;height:17px;padding:0 4px;border-radius:99px;background:var(--red);color:#fff;font-size:11px;font-weight:700;line-height:17px;text-align:center}
