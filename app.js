@@ -116,31 +116,33 @@ async function selectBiz(b) {
   $("hd-biz").textContent = b.name;
   $("hd-role").textContent = ROLES[role] || role;
   const limited = role === "staff";
-  $("tab-sched-btn").style.display = limited ? "none" : "";
+  /* Το tab «Εργασίες» είναι ορατό σε όλους — το προσωπικό βλέπει μόνο τη
+     λίστα εργασιών, όχι τις προγραμματισμένες πληρωμές. */
   $("tab-settings-btn").style.display = limited ? "none" : "";
-  if (limited && (tab === "sched" || tab === "settings")) tab = "dash";
+  if (limited && tab === "settings") tab = "dash";
   showScreen("screen-main");
   calSetBusiness(b.id);
   await loadMeta();
   renderTab();
-  if (!limited) refreshDue();
+  refreshDue();
 }
 
 /* ---- εκκρεμότητες: σήμα στο tab + συγχρονισμός ημερολογίου ---- */
 let dueItems = { scheduled: [], todos: [] };
 
 async function refreshDue() {
-  if (role === "staff") return;
   try {
-    const [sSnap, tSnap] = await Promise.all([
-      getDocs(collection(db, `${base()}/scheduled`)),
-      getDocs(collection(db, `${base()}/todos`))
-    ]);
-    dueItems.scheduled = sSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+    dueItems.scheduled = [];
+    if (role !== "staff") {
+      const sSnap = await getDocs(collection(db, `${base()}/scheduled`));
+      dueItems.scheduled = sSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+    }
+    const tSnap = await getDocs(collection(db, `${base()}/todos`));
     dueItems.todos = tSnap.docs.map(d => ({ id: d.id, ...d.data() }));
   } catch(e) { return; }
   const today = todayISO();
-  const n = dueItems.scheduled.filter(s => s.date && s.date <= today).length;
+  const n = dueItems.scheduled.filter(s => s.date && s.date <= today).length
+          + dueItems.todos.filter(t => !t.done && t.date && t.date <= today).length;
   const btn = $("tab-sched-btn");
   if (btn) {
     const old = btn.querySelector(".tab-badge");
@@ -279,9 +281,7 @@ async function renderDash() {
     <div id="dash-banks"></div>
     <div class="section-title">Πρόσφατες κινήσεις</div>
     <div class="card" id="dash-recent"><div class="spinner">Φόρτωση…</div></div>
-    <div id="dash-sched-wrap"></div>
-    <div class="section-title">Εργασίες</div>
-    <div class="card" id="dash-todos"><div class="spinner">Φόρτωση…</div></div>`;
+    <div id="dash-sched-wrap"></div>`;
   content().querySelectorAll("[data-dp]").forEach(b => b.onclick = () => { dashPeriod = b.dataset.dp; renderDash(); });
   loadDash();
 }
@@ -337,25 +337,44 @@ async function loadDash() {
       : recent.map(t => txRow(t, false)).join("");
   } catch(e) { console.error(e); $("dash-hero").innerHTML = `<div class="empty">Σφάλμα φόρτωσης</div>`; }
 
-  /* επερχόμενες πληρωμές (όχι για staff) */
-  if (role !== "staff") {
-    try {
-      const snap = await getDocs(collection(db, `${base()}/scheduled`));
-      const items = snap.docs.map(d => ({ id: d.id, ...d.data() }))
-        .sort((a,b) => a.date.localeCompare(b.date)).slice(0, 3);
-      $("dash-sched-wrap").innerHTML = items.length === 0 ? "" : `
-        <div class="section-title">Επόμενες πληρωμές</div>
-        <div class="card">${items.map(s => `
-          <div class="row">
-            <div class="row-main"><div class="row-title">${esc(s.label)}</div>
-            <div class="row-sub">${fmtShortDate(s.date)}${s.date < todayISO() ? " · ⚠ καθυστερημένη" : ""}</div></div>
-            <div class="row-amount ${s.type === "income" ? "pos" : "neg"}">${money(s.amount)}</div>
-          </div>`).join("")}</div>`;
-    } catch(e) { $("dash-sched-wrap").innerHTML = ""; }
-  }
+  /* εκκρεμότητες: πληρωμές + εργασίες με προθεσμία (σύντομη ματιά) */
+  loadDashPending();
+}
 
-  /* εργασίες */
-  loadTodos();
+async function loadDashPending() {
+  const today = todayISO();
+  const items = [];
+  try {
+    if (role !== "staff") {
+      const sSnap = await getDocs(collection(db, `${base()}/scheduled`));
+      sSnap.forEach(d => {
+        const s = d.data();
+        if (s.date) items.push({ kind: "pay", label: s.label, date: s.date, amount: s.amount, type: s.type });
+      });
+    }
+    const tSnap = await getDocs(collection(db, `${base()}/todos`));
+    tSnap.forEach(d => {
+      const t = d.data();
+      if (t.date && !t.done) items.push({ kind: "todo", label: t.text, date: t.date });
+    });
+  } catch(e) { $("dash-sched-wrap").innerHTML = ""; return; }
+
+  items.sort((a,b) => a.date.localeCompare(b.date));
+  const top = items.slice(0, 4);
+  $("dash-sched-wrap").innerHTML = top.length === 0 ? "" : `
+    <div class="section-title">Εκκρεμότητες</div>
+    <div class="card">${top.map(i => {
+      const late = i.date <= today;
+      return `
+      <div class="row">
+        <div class="row-main">
+          <div class="row-title">${i.kind === "pay" ? "💸" : "⬜"} ${esc(i.label)}</div>
+          <div class="row-sub" style="${late ? "color:var(--red);font-weight:600" : ""}">${late ? "⚠ " : ""}${fmtShortDate(i.date)}</div>
+        </div>
+        ${i.kind === "pay" ? `<div class="row-amount ${i.type === "income" ? "pos" : "neg"}">${money(i.amount)}</div>` : ""}
+      </div>`; }).join("")}
+      <div class="row-sub" style="margin-top:8px">Διαχείριση στο tab «Εργασίες»</div>
+    </div>`;
 }
 
 async function loadTodos() {
@@ -367,7 +386,7 @@ async function loadTodos() {
         if (a.done !== b.done) return a.done ? 1 : -1;
         return (a.date || "9999").localeCompare(b.date || "9999");
       });
-    $("dash-todos").innerHTML = `
+    $("task-todos").innerHTML = `
       <div style="display:flex;gap:8px;margin-bottom:8px">
         <input type="text" class="form-input" id="todo-input" placeholder="Νέα εργασία…" style="flex:1">
         <button class="btn-primary" id="todo-add" style="width:auto;margin-top:0;padding:11px 16px">+</button>
@@ -396,15 +415,15 @@ async function loadTodos() {
       loadTodos(); refreshDue();
     };
     $("todo-input").addEventListener("keydown", e => { if (e.key === "Enter") $("todo-add").click(); });
-    $("dash-todos").querySelectorAll("[data-todo-toggle]").forEach(c => c.onchange = async () => {
+    $("task-todos").querySelectorAll("[data-todo-toggle]").forEach(c => c.onchange = async () => {
       await setDoc(doc(db, `${base()}/todos/${c.dataset.todoToggle}`), { done: c.checked }, { merge: true });
       loadTodos(); refreshDue();
     });
-    $("dash-todos").querySelectorAll("[data-todo-del]").forEach(b => b.onclick = async () => {
+    $("task-todos").querySelectorAll("[data-todo-del]").forEach(b => b.onclick = async () => {
       await deleteDoc(doc(db, `${base()}/todos/${b.dataset.todoDel}`));
       loadTodos(); refreshDue();
     });
-  } catch(e) { console.error(e); $("dash-todos").innerHTML = `<div class="empty">Σφάλμα φόρτωσης</div>`; }
+  } catch(e) { console.error(e); $("task-todos").innerHTML = `<div class="empty">Σφάλμα φόρτωσης</div>`; }
 }
 
 /* ============ ΤΑΜΕΙΟ ============ */
@@ -758,8 +777,8 @@ async function loadTxList() {
 
 /* ============ ΠΛΗΡΩΜΕΣ (προγραμματισμένες) ============ */
 function renderSched() {
-  if (role === "staff") { tab = "dash"; renderTab(); return; }
-  content().innerHTML = `
+  const canPay = role !== "staff";
+  content().innerHTML = (canPay ? `
     <div class="section-title">Νέα προγραμματισμένη πληρωμή</div>
     <div class="card">
       <label class="form-label">Περιγραφή</label>
@@ -786,7 +805,12 @@ function renderSched() {
       <input type="text" class="form-input" id="sc-cat" placeholder="π.χ. Φόροι">
       <button class="btn-primary" id="sc-save">Προσθήκη</button>
     </div>
-    <div id="sc-groups"><div class="spinner">Φόρτωση…</div></div>`;
+    <div id="sc-groups"><div class="spinner">Φόρτωση…</div></div>` : "") + `
+    <div class="section-title">Λίστα εργασιών</div>
+    <div class="card" id="task-todos"><div class="spinner">Φόρτωση…</div></div>`;
+
+  loadTodos();
+  if (!canPay) return;
 
   $("sc-save").onclick = async () => {
     const label = $("sc-label").value.trim();

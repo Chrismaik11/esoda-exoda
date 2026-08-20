@@ -1,6 +1,6 @@
 /* Service worker — Έσοδα–Έξοδα
    Στρατηγική: network-first με cache fallback (πάντα φρέσκο online, δουλεύει offline). */
-const CACHE = "ee-v4";
+const CACHE = "ee-v5";
 const ASSETS = [
   "./", "./index.html", "./styles.css", "./app.js", "./util.js",
   "./engine.js", "./voice.js", "./calendar.js", "./config.js",
